@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Comparador de Combustíveis</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwTedZwIjQNCAIUpay4NNNO7CYaeY8UpU&libraries=places"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Comparador de Combustíveis</h1>
+        <form id="form">
+            <label for="cidade">Cidade:</label>
+            <input type="text" id="cidade" name="cidade" required><br>
+            <label for="gasolina">Preço da Gasolina (R$):</label>
+            <input type="number" step="0.01" id="gasolina" name="gasolina" required><br>
+            <label for="etanol">Preço do Etanol (R$):</label>
+            <input type="number" step="0.01" id="etanol" name="etanol" required><br>
+            <button type="submit">Comparar</button>
+        </form>
+        <div id="resultado"></div>
+        <button id="buscarPostos" style="display:none;">Buscar Postos Próximos</button>
+        <div id="map" style="height: 500px; width: 100%; display: none;"></div>
+        <div id="postos"></div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

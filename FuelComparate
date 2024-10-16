@@ -1,0 +1,86 @@
+from flask import Flask, render_template, jsonify, request
+from flask_restful import Api, Resource
+import requests
+from geopy.geocoders import Nominatim
+
+app = Flask(__name__)
+api = Api(app)
+
+def buscar_postos_proximos(lat, lon):
+    api_key = 'AIzaSyAwTedZwIjQNCAIUpay4NNNO7CYaeY8UpU'
+    types = 'gas_station'
+    url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={lat},{lon}&radius=5000&type={types}&key={api_key}"
+    
+    response = requests.get(url)
+    print(f"URL da requisição: {response.url}")  # Mensagem de depuração
+    print(f"Status da resposta: {response.status_code}")  # Mensagem de depuração
+
+    if response.status_code == 200:
+        data = response.json()
+        print(f"Dados recebidos: {data}")  # Mensagem de depuração
+        postos = []
+        for result in data['results']:
+            posto = {
+                'nome': result['name'],
+                'endereco': result['vicinity']
+            }
+            postos.append(posto)
+        return {'postos': postos}
+    else:
+        print("Erro ao acessar a API")  # Mensagem de depuração
+        return None
+
+def comparar_precos(gasolina, etanol):
+    relacao_eficiencia = 0.7
+    if etanol <= gasolina * relacao_eficiencia:
+        return "Etanol"
+    else:
+        return "Gasolina"
+
+class CombustivelResource(Resource):
+    def get(self):
+        cidade = request.args.get('cidade')
+        gasolina = float(request.args.get('gasolina'))
+        etanol = float(request.args.get('etanol'))
+
+        print(f"Obtendo coordenadas para a cidade: {cidade}")
+        
+        geolocator = Nominatim(user_agent="geoapiExercises")
+        location = geolocator.geocode(cidade, timeout=10)
+        
+        if location:
+            lat, lon = location.latitude, location.longitude
+            print(f"Coordenadas obtidas: {lat}, {lon}")
+        else:
+            print("Erro ao obter coordenadas.")
+            return jsonify({"error": "Não foi possível obter coordenadas para a cidade especificada."})
+
+        combustivel_economico = comparar_precos(gasolina, etanol)
+        print(f"Combustível mais econômico: {combustivel_economico}")
+        
+        result = {
+            "combustivel_mais_economico": combustivel_economico,
+            "latitude": lat,
+            "longitude": lon
+        }
+        
+        return jsonify(result)
+
+class PostosProximosResource(Resource):
+    def get(self):
+        lat = float(request.args.get('lat'))
+        lon = float(request.args.get('lon'))
+
+        postos_proximos = buscar_postos_proximos(lat, lon)
+        
+        return jsonify(postos_proximos)
+
+api.add_resource(CombustivelResource, '/api/combustivel')
+api.add_resource(PostosProximosResource, '/api/postosproximos')
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
