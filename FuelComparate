@@ -12,12 +12,12 @@ def buscar_postos_proximos(lat, lon):
     url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={lat},{lon}&radius=5000&type={types}&key={api_key}"
     
     response = requests.get(url)
-    print(f"URL da requisição: {response.url}")  # Mensagem de depuração
-    print(f"Status da resposta: {response.status_code}")  # Mensagem de depuração
+    print(f"URL da requisição: {response.url}")
+    print(f"Status da resposta: {response.status_code}")
 
     if response.status_code == 200:
         data = response.json()
-        print(f"Dados recebidos: {data}")  # Mensagem de depuração
+        print(f"Dados recebidos: {data}")
         postos = []
         for result in data['results']:
             posto = {
@@ -27,7 +27,7 @@ def buscar_postos_proximos(lat, lon):
             postos.append(posto)
         return {'postos': postos}
     else:
-        print("Erro ao acessar a API")  # Mensagem de depuração
+        print("Erro ao acessar a API")
         return None
 
 def comparar_precos(gasolina, etanol):
@@ -45,7 +45,7 @@ class CombustivelResource(Resource):
 
         print(f"Obtendo coordenadas para a cidade: {cidade}")
         
-        geolocator = Nominatim(user_agent="geoapiExercises")
+        geolocator = Nominatim(user_agent="sua_aplicacao")
         location = geolocator.geocode(cidade, timeout=10)
         
         if location:
